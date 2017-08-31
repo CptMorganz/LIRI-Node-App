@@ -8,9 +8,14 @@
 var dataKeys = require("./keys.js");
 var fs = require('fs'); //file system
 var twitter = require('twitter');
-var spotify = require('spotify');
+var Spotify = require('node-spotify-api');
 var request = require('request');
 
+// spotify key?
+var spotify = new Spotify({
+  id: "8b68904cb5834191b9f137c1ec64f1ba",
+  secret: "f96676b29f7e4c9791e90c8a0d59a486"
+});
 
 var writeToLog = function(data) {
   fs.appendFile("log.txt", '\r\n\r\n');
@@ -60,7 +65,8 @@ var getMeSpotify = function(songName) {
 var getTweets = function() {
   var client = new twitter(dataKeys.twitterKeys);
 
-  var params = { screen_name: 'ednas', count: 10 };
+  // compliments of Everett for the Taylor Swift updates
+  var params = { screen_name: 'TaylorSwift13', count: 10 };
 
   client.get('statuses/user_timeline', params, function(error, tweets, response) {
 
@@ -84,7 +90,7 @@ var getMeMovie = function(movieName) {
     movieName = 'Mr Nobody';
   }
 
-  var urlHit = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=full&tomatoes=true&r=json";
+  var urlHit = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=full&tomatoes=true&r=json&apikey=40e9cece";
 
   request(urlHit, function(error, response, body) {
     if (!error && response.statusCode == 200) {
@@ -100,12 +106,11 @@ var getMeMovie = function(movieName) {
       'Language: ' : jsonData.Language,
       'Plot: ' : jsonData.Plot,
       'Actors: ' : jsonData.Actors,
-  });
+  		});
       console.log(data);
       writeToLog(data);
-}
+		}
   });
-
 }
 
 var doWhatItSays = function() {
@@ -146,4 +151,9 @@ var runThis = function(argOne, argTwo) {
   pick(argOne, argTwo);
 };
 
-runThis(process.argv[2], process.argv[3]);
+var searchQuery = '';
+for (var i = 3; i < process.argv.length; i++) {
+	searchQuery += process.argv[i] + '+';
+}
+
+runThis(process.argv[2], searchQuery);
